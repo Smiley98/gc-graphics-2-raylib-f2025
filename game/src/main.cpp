@@ -99,7 +99,9 @@ int main()
     int testScore = 0;
 
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Pong");
+    InitAudioDevice();
     SetTargetFPS(60);
+
     while (!WindowShouldClose())
     {
         float dt = GetFrameTime();
@@ -157,6 +159,7 @@ int main()
         EndDrawing();
     }
 
+    CloseAudioDevice();
     CloseWindow();
     return 0;
 }
