@@ -57,7 +57,7 @@ Vector2 TileCenter(int row, int col)
 }
 
 // Returns a collection of adjacent cells that match the search value.
-std::vector<Cell> FloodFill(Cell start, int tiles[TILE_COUNT][TILE_COUNT], TileType searchValue)
+std::vector<Cell> FloodFill(Cell start, int tiles[TILE_COUNT][TILE_COUNT], TileType searchValue, TileType ignoreValue)
 {
     // "open" = "places we want to search", "closed" = "places we've already searched".
     std::vector<Cell> result;
@@ -68,7 +68,7 @@ std::vector<Cell> FloodFill(Cell start, int tiles[TILE_COUNT][TILE_COUNT], TileT
         for (int col = 0; col < TILE_COUNT; col++)
         {
             // We don't want to search zero-tiles, so add them to closed!
-            closed[row][col] = tiles[row][col] == 0;
+            closed[row][col] = tiles[row][col] == ignoreValue;
         }
     }
 
@@ -89,7 +89,7 @@ std::vector<Cell> FloodFill(Cell start, int tiles[TILE_COUNT][TILE_COUNT], TileT
         for (Cell dir : DIRECTIONS)
         {
             Cell adj = { cell.row + dir.row, cell.col + dir.col };
-            if (InBounds(adj) && !closed[adj.row][adj.col] && tiles[adj.row][adj.col] > 0)
+            if (InBounds(adj) && !closed[adj.row][adj.col] && tiles[adj.row][adj.col] != ignoreValue)
                 open.push_back(adj);
         }
     }
@@ -138,7 +138,9 @@ int main()
     //};
 
     // Automatic:
-    std::vector<Cell> waypoints = FloodFill({ 0, 12 }, tiles, WAYPOINT);
+    std::vector<Cell> waypoints = FloodFill({ 0, 12 }, tiles, WAYPOINT, GRASS);
+    std::vector<Cell> dirt = FloodFill({ 0, 12 }, tiles, DIRT, GRASS);
+    std::vector<Cell> grass = FloodFill({ 0, 12 }, tiles, GRASS, WAYPOINT);
 
     // Challenge:
     // 1) Use floodfill to get a vector of all dirt tiles
@@ -164,6 +166,12 @@ int main()
         //        DrawTile(row, col, tiles[row][col]);
         //    }
         //}
+
+        for (Cell cell : grass)
+            DrawTile(cell.row, cell.col, LIME);
+
+        for (Cell cell : dirt)
+            DrawTile(cell.row, cell.col, BEIGE);
 
         for (Cell cell : waypoints)
             DrawTile(cell.row, cell.col, ORANGE);
