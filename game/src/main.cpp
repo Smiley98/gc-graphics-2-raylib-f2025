@@ -45,6 +45,7 @@ void DrawTile(int row, int col, int type)
         BEIGE,
         SKYBLUE
     };
+    //assert(type >= 0 && type < COUNT);
     DrawTile(row, col, colors[type]);
 }
 
@@ -123,6 +124,29 @@ int main()
             { 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }  // 19
     };
 
+    // Manual:
+    //std::vector<Cell> waypoints =
+    //{
+    //    { 0, 12 },
+    //    { 7, 12 },
+    //    { 7, 3 },
+    //    { 13, 3 },
+    //    { 13, 16 },
+    //    { 17, 16 },
+    //    { 17, 9 },
+    //    { 19, 9 }
+    //};
+
+    // Automatic:
+    std::vector<Cell> waypoints = FloodFill({ 0, 12 }, tiles, WAYPOINT);
+
+    // Challenge:
+    // 1) Use floodfill to get a vector of all dirt tiles
+    // 2) Use floodfill to get a vector of all grass tiles
+    // 3) Render all dirt tiles
+    // 4) Render all grass tiles
+    // (Grass tiles may involve modifying floodfill)
+
     InitWindow(SCREEN_SIZE, SCREEN_SIZE, "Tower Defense");
     SetTargetFPS(60);
     while (!WindowShouldClose())
@@ -130,16 +154,19 @@ int main()
         float dt = GetFrameTime();
 
         BeginDrawing();
-        ClearBackground(MAGENTA);
+        ClearBackground(BLACK);
 
         // Draw entire grid
-        for (int row = 0; row < TILE_COUNT; row++)
-        {
-            for (int col = 0; col < TILE_COUNT; col++)
-            {
-                DrawTile(row, col, tiles[row][col]);
-            }
-        }
+        //for (int row = 0; row < TILE_COUNT; row++)
+        //{
+        //    for (int col = 0; col < TILE_COUNT; col++)
+        //    {
+        //        DrawTile(row, col, tiles[row][col]);
+        //    }
+        //}
+
+        for (Cell cell : waypoints)
+            DrawTile(cell.row, cell.col, ORANGE);
 
         EndDrawing();
     }
