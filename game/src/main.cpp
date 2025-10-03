@@ -123,6 +123,18 @@ int main()
             { 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }  // 19
     };
 
+    std::vector<Cell> waypoints =
+    {
+        { 0, 12 },
+        { 7, 12 },
+        { 7, 3 },
+        { 13, 3 },
+        { 13, 16 },
+        { 17, 16 },
+        { 17, 9 },
+        { 19, 9 },
+    };
+
     InitWindow(SCREEN_SIZE, SCREEN_SIZE, "Tower Defense");
     SetTargetFPS(60);
     while (!WindowShouldClose())
@@ -132,12 +144,19 @@ int main()
         BeginDrawing();
         ClearBackground(MAGENTA);
 
+        // Draw entire grid
         for (int row = 0; row < TILE_COUNT; row++)
         {
             for (int col = 0; col < TILE_COUNT; col++)
             {
                 DrawTile(row, col, tiles[row][col]);
             }
+        }
+
+        // Draw waypoints only (to check our waypoints array)
+        for (Cell cell : waypoints)
+        {
+            DrawTile(cell.row, cell.col, PINK);
         }
 
         EndDrawing();
