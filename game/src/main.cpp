@@ -129,6 +129,9 @@ int main()
 
     Vector2 enemyPosition = TileCenter(waypoints[curr].row, waypoints[curr].col);
     float enemySpeed = 250.0f;   // <-- 250 pixels per second
+    float minDistance = enemySpeed / 60.0f;
+    minDistance *= 1.1f;
+    bool atEnd = false;
 
     InitWindow(SCREEN_SIZE, SCREEN_SIZE, "Tower Defense");
     SetTargetFPS(60);
@@ -136,10 +139,23 @@ int main()
     {
         float dt = GetFrameTime();
 
-        Vector2 from = TileCenter(waypoints[curr].row, waypoints[curr].col);
-        Vector2 to = TileCenter(waypoints[next].row, waypoints[next].col);
-        Vector2 direction = Vector2Normalize(to - from);
-        enemyPosition += direction * enemySpeed * dt;
+        if (!atEnd)
+        {
+            Vector2 from = TileCenter(waypoints[curr].row, waypoints[curr].col);
+            Vector2 to = TileCenter(waypoints[next].row, waypoints[next].col);
+            Vector2 direction = Vector2Normalize(to - from);
+            enemyPosition += direction * enemySpeed * dt;
+
+            // Tolorance depends on enemy speed
+            if (CheckCollisionPointCircle(enemyPosition, to, minDistance))
+            {
+                enemyPosition = to;
+
+                curr++;
+                next++;
+                atEnd = curr == waypoints.size() - 1;
+            }
+        }
 
         BeginDrawing();
         ClearBackground(BLACK);
@@ -152,8 +168,6 @@ int main()
                 DrawTile(row, col, tiles[row][col]);
             }
         }
-        DrawCircleV(from, 20.0f, RED);
-        DrawCircleV(to, 20.0f, GREEN);
         DrawCircleV(enemyPosition, 20.0f, GOLD);
 
         EndDrawing();
