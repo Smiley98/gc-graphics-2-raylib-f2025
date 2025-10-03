@@ -123,17 +123,11 @@ int main()
             { 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }  // 19
     };
 
-    std::vector<Cell> waypoints =
-    {
-        { 0, 12 },
-        { 7, 12 },
-        { 7, 3 },
-        { 13, 3 },
-        { 13, 16 },
-        { 17, 16 },
-        { 17, 9 },
-        { 19, 9 },
-    };
+    std::vector<Cell> waypoints = FloodFill({ 0, 12 }, tiles, WAYPOINT);
+    // 1) Use flood fill to store all dirt tiles
+    // 2) Use flood fill to store all grass tiles (you may need to call it multiple times)
+    // 3) Render dirt tiles
+    // 4) Render grass tiles
 
     InitWindow(SCREEN_SIZE, SCREEN_SIZE, "Tower Defense");
     SetTargetFPS(60);
