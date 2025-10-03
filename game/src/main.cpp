@@ -123,41 +123,11 @@ int main()
             { 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }  // 19
     };
 
-    std::vector<Cell> waypoints = FloodFill({ 0, 12 }, tiles, WAYPOINT);
-    int curr = 0;
-    int next = curr + 1;
-    bool atEnd = false;
-
-    Vector2 enemyPosition = TileCenter(waypoints[curr].row, waypoints[curr].col);
-    float enemySpeed = 250.0f;
-
     InitWindow(SCREEN_SIZE, SCREEN_SIZE, "Tower Defense");
     SetTargetFPS(60);
     while (!WindowShouldClose())
     {
         float dt = GetFrameTime();
-
-        // Advanced waypoints until we've reached the last waypoint
-        if (!atEnd)
-        {
-            // Move enemy from current waypoint to next waypoint
-            Vector2 from = TileCenter(waypoints[curr].row, waypoints[curr].col);
-            Vector2 to = TileCenter(waypoints[next].row, waypoints[next].col);
-            Vector2 direction = Vector2Normalize(to - from);
-            enemyPosition += direction * enemySpeed * dt;
-
-            // Increment waypoints if the enemy has hit the next waypoint!
-            if (CheckCollisionPointCircle(enemyPosition, to, 10.0f))
-            {
-                // Re-center our enemy
-                enemyPosition = TileCenter(waypoints[next].row, waypoints[next].col);
-
-                // Increment waypoints
-                curr++;
-                next++;
-                atEnd = curr == waypoints.size() - 1;
-            }
-        }
 
         BeginDrawing();
         ClearBackground(MAGENTA);
@@ -170,7 +140,6 @@ int main()
                 DrawTile(row, col, tiles[row][col]);
             }
         }
-        DrawCircleV(enemyPosition, 20.0f, RED);
 
         EndDrawing();
     }
