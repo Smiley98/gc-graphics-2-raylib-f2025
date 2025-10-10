@@ -170,16 +170,19 @@ int main()
             bullets.push_back(bullet);
         }
 
+        int bulletEnabledCount = 0;
         for (Bullet& bullet : bullets)
         {
             if (bullet.enabled)
             {
+                bulletEnabledCount++;
                 bullet.position += bullet.direction * BULLET_SPEED * dt;
                 bullet.time += dt;
 
                 bool expired = bullet.time >= BULLET_LIFE_TIME;
                 bool collision = CheckCollisionCircles(bullet.position, BULLET_RADIUS, enemyPosition, ENEMY_RADIUS);
                 collision |= !CheckCollisionCircleRec(bullet.position, BULLET_RADIUS, SCREEN_REC);
+
                 bullet.enabled = !collision && !expired;
             }
         }
@@ -219,11 +222,29 @@ int main()
             if (bullet.enabled)
                 DrawCircleV(bullet.position, BULLET_RADIUS, RED);
         }
-
         DrawCircleV(enemyPosition, ENEMY_RADIUS, GOLD);
-
+        
+        DrawText(TextFormat("Total Bullets: %i", bullets.size()), 10, 10, 20, RED);
+        DrawText(TextFormat("Enabled Bullets: %i", bulletEnabledCount), 10, 30, 20, RED);
+        DrawText(TextFormat("%i", GetFPS()), 770, 10, 20, RED);
         EndDrawing();
     }
     CloseWindow();
     return 0;
 }
+
+//std::vector<int> numbers{ 1, 1, 2, 2, 3, 3, 4, 4, 5, 5 };
+//for (int i = 0; i < numbers.size(); i++)
+//{
+//    if (numbers[i] % 2 == 1)
+//    {
+//        numbers.erase(numbers.begin() + i);
+//        i--;
+//    }
+//}
+
+// remove_if sorts the array so that all the elements we want to remove are at the end.
+// For example, if we start with    { 1, 1, 2, 2, 3, 3, 4, 4, 5, 5 },
+// We'll end up with                { 2, 2, 4, 4, 1, 1, 3, 3, 5, 5, }
+//auto start = std::remove_if(numbers.begin(), numbers.end(), [](int n) { return n % 2 == 1; });
+//numbers.erase(start, numbers.end());
