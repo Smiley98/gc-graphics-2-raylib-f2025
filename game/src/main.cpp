@@ -109,6 +109,28 @@ struct Bullet
 
 int main()
 {
+    std::vector<int> numbers{ 1, 1, 2, 2, 3, 3, 4, 4, 5, 5 };
+    //for (int i = 0; i < numbers.size(); i++)
+    //{
+    //    if (numbers[i] % 2 == 1)
+    //    {
+    //        numbers.erase(numbers.begin() + i);
+    //        i--;
+    //    }
+    //}
+
+    // 1, 1, 2, 2, 3, 3, 4, 4, 5, 5
+    // 2, 2, 4, 4, 1, 1, 3, 3, 5, 5,
+    auto removeStart = std::remove_if(numbers.begin(), numbers.end(),
+        [](int n)
+        {
+            // Return true if element should be removed!
+            return n % 2 == 1;
+        });
+
+    // Note that remove_if only sorts the data. You must call erase separately to remove everything!
+    numbers.erase(removeStart, numbers.end());
+
     int tiles[TILE_COUNT][TILE_COUNT]
     {
         //col:0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19    row:
