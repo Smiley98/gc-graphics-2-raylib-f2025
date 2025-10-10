@@ -138,7 +138,7 @@ int main()
     int next = curr + 1;
 
     Vector2 enemyPosition = TileCenter(waypoints[curr].row, waypoints[curr].col);
-    float enemySpeed = 250.0f;   // <-- 250 pixels per second
+    float enemySpeed = 250.0f;
     float minDistance = enemySpeed / 60.0f;
     minDistance *= 1.1f;
     bool atEnd = false;
@@ -186,6 +186,9 @@ int main()
 
         bullets.erase(bulletRemoveStart, bullets.end());
 
+        // Hint: You'll need to add a system (remove_if) that flags enemies for deletion then removes them
+        // Hint: To handle collision, you'll need a nested for-loop that tests all bullets vs all enemies
+
         if (!atEnd)
         {
             Vector2 from = TileCenter(waypoints[curr].row, waypoints[curr].col);
@@ -193,7 +196,6 @@ int main()
             Vector2 direction = Vector2Normalize(to - from);
             enemyPosition += direction * enemySpeed * dt;
 
-            // Tolorance depends on enemy speed
             if (CheckCollisionPointCircle(enemyPosition, to, minDistance))
             {
                 enemyPosition = to;
