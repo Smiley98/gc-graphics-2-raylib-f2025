@@ -11,6 +11,9 @@ constexpr float SCREEN_SIZE = 800;
 constexpr int TILE_COUNT = 20;
 constexpr float TILE_SIZE = SCREEN_SIZE / TILE_COUNT;
 
+constexpr float BULLET_RADIUS = 10.0f;
+constexpr float BULLET_SPEED = 400.0f;
+
 enum TileType : int
 {
     GRASS,      // Marks unoccupied space, can be overwritten 
@@ -39,12 +42,10 @@ void DrawTile(int row, int col, Color color)
 
 void DrawTile(int row, int col, int type)
 {
-    Color colors[3] =
-    {
-        LIME,
-        BEIGE,
-        SKYBLUE
-    };
+    Color colors[COUNT];
+    colors[GRASS] = LIME;
+    colors[DIRT] = BEIGE;
+    colors[WAYPOINT] = SKYBLUE;
     //assert(type >= 0 && type < COUNT);
     DrawTile(row, col, colors[type]);
 }
@@ -97,6 +98,12 @@ std::vector<Cell> FloodFill(Cell start, int tiles[TILE_COUNT][TILE_COUNT], TileT
     return result;
 }
 
+struct Bullet
+{
+    Vector2 position = Vector2Zeros;
+    Vector2 direction = Vector2Zeros;
+};
+
 int main()
 {
     int tiles[TILE_COUNT][TILE_COUNT]
@@ -133,11 +140,28 @@ int main()
     minDistance *= 1.1f;
     bool atEnd = false;
 
+    float shootTimeCurrent = 0.0f;
+    float shootTimeTotal = 1.0f;
+
+    std::vector<Bullet> bullets;
+
     InitWindow(SCREEN_SIZE, SCREEN_SIZE, "Tower Defense");
     SetTargetFPS(60);
     while (!WindowShouldClose())
     {
         float dt = GetFrameTime();
+
+        shootTimeCurrent += dt;
+        if (shootTimeCurrent >= shootTimeTotal && IsKeyDown(KEY_SPACE))
+        {
+            shootTimeCurrent = 0.0f;
+
+            // AB = B - A
+            Bullet bullet;
+            bullet.position = GetMousePosition();
+            bullet.direction = Vector2Normalize(enemyPosition - bullet.position);
+            bullets.push_back(bullet);
+        }
 
         if (!atEnd)
         {
@@ -168,10 +192,29 @@ int main()
                 DrawTile(row, col, tiles[row][col]);
             }
         }
+
+        for (const Bullet& bullet : bullets)
+        {
+            DrawCircleV(bullet.position, BULLET_RADIUS, RED);
+        }
+
         DrawCircleV(enemyPosition, 20.0f, GOLD);
+        DrawText(TextFormat("%i", GetFPS()), 770, 10, 20, RED);
 
         EndDrawing();
     }
     CloseWindow();
     return 0;
 }
+
+//for (int row = 0; row < TILE_COUNT; row++)
+//{
+//    float y = row * TILE_SIZE;
+//    DrawLineEx({ 0.0f, y }, { SCREEN_SIZE, y }, 2.0f, LIGHTGRAY);
+//}
+//
+//for (int col = 0; col < TILE_COUNT; col++)
+//{
+//    float x = col * TILE_SIZE;
+//    DrawLineEx({ x, 0.0f }, { x, SCREEN_SIZE }, 2.0f, LIGHTGRAY);
+//}
