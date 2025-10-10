@@ -108,7 +108,7 @@ struct Bullet
     Vector2 position = Vector2Zeros;
     Vector2 direction = Vector2Zeros;
     float time = 0.0f;
-    bool enabled = true;
+    bool destroy = false;
 };
 
 int main()
@@ -137,6 +137,7 @@ int main()
             { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, // 18
             { 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }  // 19
     };
+
     std::vector<Cell> waypoints = FloodFill({ 0, 12 }, tiles, WAYPOINT);
     int curr = 0;
     int next = curr + 1;
@@ -170,22 +171,29 @@ int main()
             bullets.push_back(bullet);
         }
 
-        int bulletEnabledCount = 0;
+        // 1) Update bullet logic (motion + destroy flag)
         for (Bullet& bullet : bullets)
         {
-            if (bullet.enabled)
-            {
-                bulletEnabledCount++;
-                bullet.position += bullet.direction * BULLET_SPEED * dt;
-                bullet.time += dt;
+            bullet.position += bullet.direction * BULLET_SPEED * dt;
+            bullet.time += dt;
 
-                bool expired = bullet.time >= BULLET_LIFE_TIME;
-                bool collision = CheckCollisionCircles(bullet.position, BULLET_RADIUS, enemyPosition, ENEMY_RADIUS);
-                collision |= !CheckCollisionCircleRec(bullet.position, BULLET_RADIUS, SCREEN_REC);
+            bool expired = bullet.time >= BULLET_LIFE_TIME;
+            bool collision = CheckCollisionCircles(bullet.position, BULLET_RADIUS, enemyPosition, ENEMY_RADIUS);
+            collision |= !CheckCollisionCircleRec(bullet.position, BULLET_RADIUS, SCREEN_REC);
 
-                bullet.enabled = !collision && !expired;
-            }
+            bullet.destroy = collision || expired;
         }
+        
+        // 2) Remove bullets based on destroy flag
+        auto bulletsRemoveStart = std::remove_if(bullets.begin(), bullets.end(),
+            [](Bullet& bullet)
+            {
+                return bullet.destroy;
+            });
+        bullets.erase(bulletsRemoveStart, bullets.end());
+
+        // Start simple - try to spawn 10 enemies and move them along the path before adding turrets
+        // Note - You'll most likely need a 2d for-loop that tests all bullets against all enemies
 
         if (!atEnd)
         {
@@ -218,14 +226,10 @@ int main()
         }
 
         for (const Bullet& bullet : bullets)
-        {
-            if (bullet.enabled)
-                DrawCircleV(bullet.position, BULLET_RADIUS, RED);
-        }
+            DrawCircleV(bullet.position, BULLET_RADIUS, RED);
         DrawCircleV(enemyPosition, ENEMY_RADIUS, GOLD);
         
-        DrawText(TextFormat("Total Bullets: %i", bullets.size()), 10, 10, 20, RED);
-        DrawText(TextFormat("Enabled Bullets: %i", bulletEnabledCount), 10, 30, 20, RED);
+        DrawText(TextFormat("Bullets: %i", bullets.size()), 10, 10, 20, RED);
         DrawText(TextFormat("%i", GetFPS()), 770, 10, 20, RED);
         EndDrawing();
     }
