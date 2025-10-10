@@ -163,6 +163,11 @@ int main()
             bullets.push_back(bullet);
         }
 
+        for (Bullet& bullet : bullets)
+        {
+            bullet.position += bullet.direction * BULLET_SPEED * dt;
+        }
+
         if (!atEnd)
         {
             Vector2 from = TileCenter(waypoints[curr].row, waypoints[curr].col);
