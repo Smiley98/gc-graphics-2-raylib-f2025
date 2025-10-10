@@ -7,9 +7,15 @@
 #include <algorithm>
 
 constexpr float SCREEN_SIZE = 800;
+constexpr Rectangle SCREEN_REC = { 0, 0, SCREEN_SIZE, SCREEN_SIZE };
 
 constexpr int TILE_COUNT = 20;
 constexpr float TILE_SIZE = SCREEN_SIZE / TILE_COUNT;
+
+constexpr float ENEMY_RADIUS = 10.0f;
+constexpr float BULLET_RADIUS = 10.0f;
+constexpr float BULLET_SPEED = 300.0f;
+constexpr float BULLET_LIFE_TIME = 1.0f;
 
 enum TileType : int
 {
@@ -97,6 +103,14 @@ std::vector<Cell> FloodFill(Cell start, int tiles[TILE_COUNT][TILE_COUNT], TileT
     return result;
 }
 
+struct Bullet
+{
+    Vector2 position = Vector2Zeros;
+    Vector2 direction = Vector2Zeros;
+    float time = 0.0f;
+    bool enabled = true;
+};
+
 int main()
 {
     int tiles[TILE_COUNT][TILE_COUNT]
@@ -133,11 +147,42 @@ int main()
     minDistance *= 1.1f;
     bool atEnd = false;
 
+    float shootTimeCurrent = 0.0f;
+    float shootTimeTotal = 1.0f;
+
+    std::vector<Bullet> bullets;
+
     InitWindow(SCREEN_SIZE, SCREEN_SIZE, "Tower Defense");
     SetTargetFPS(60);
     while (!WindowShouldClose())
     {
         float dt = GetFrameTime();
+
+        shootTimeCurrent += dt;
+        if (IsKeyDown(KEY_SPACE) && shootTimeCurrent >= shootTimeTotal)
+        {
+            shootTimeCurrent = 0.0f;
+
+            // AB = B - A
+            Bullet bullet;
+            bullet.position = GetMousePosition();
+            bullet.direction = Vector2Normalize(enemyPosition - bullet.position);
+            bullets.push_back(bullet);
+        }
+
+        for (Bullet& bullet : bullets)
+        {
+            if (bullet.enabled)
+            {
+                bullet.position += bullet.direction * BULLET_SPEED * dt;
+                bullet.time += dt;
+
+                bool expired = bullet.time >= BULLET_LIFE_TIME;
+                bool collision = CheckCollisionCircles(bullet.position, BULLET_RADIUS, enemyPosition, ENEMY_RADIUS);
+                collision |= !CheckCollisionCircleRec(bullet.position, BULLET_RADIUS, SCREEN_REC);
+                bullet.enabled = !collision && !expired;
+            }
+        }
 
         if (!atEnd)
         {
@@ -168,7 +213,14 @@ int main()
                 DrawTile(row, col, tiles[row][col]);
             }
         }
-        DrawCircleV(enemyPosition, 20.0f, GOLD);
+
+        for (const Bullet& bullet : bullets)
+        {
+            if (bullet.enabled)
+                DrawCircleV(bullet.position, BULLET_RADIUS, RED);
+        }
+
+        DrawCircleV(enemyPosition, ENEMY_RADIUS, GOLD);
 
         EndDrawing();
     }
