@@ -13,6 +13,7 @@ constexpr float TILE_SIZE = SCREEN_SIZE / TILE_COUNT;
 
 constexpr float BULLET_RADIUS = 10.0f;
 constexpr float BULLET_SPEED = 400.0f;
+constexpr float BULLET_LIFE_TIME = 1.0f;
 
 enum TileType : int
 {
@@ -102,6 +103,8 @@ struct Bullet
 {
     Vector2 position = Vector2Zeros;
     Vector2 direction = Vector2Zeros;
+    float time = 0.0f;
+    bool destroy = false;
 };
 
 int main()
@@ -163,9 +166,19 @@ int main()
             bullets.push_back(bullet);
         }
 
+        int bulletCount = 0;
         for (Bullet& bullet : bullets)
         {
-            bullet.position += bullet.direction * BULLET_SPEED * dt;
+            if (!bullet.destroy)
+            {
+                bulletCount++;
+                bullet.position += bullet.direction * BULLET_SPEED * dt;
+                bullet.time += dt;
+
+                bool expired = bullet.time >= BULLET_LIFE_TIME;
+                bool collision = false;
+                bullet.destroy = expired || collision;
+            }
         }
 
         if (!atEnd)
@@ -200,11 +213,14 @@ int main()
 
         for (const Bullet& bullet : bullets)
         {
-            DrawCircleV(bullet.position, BULLET_RADIUS, RED);
+            if (!bullet.destroy)
+                DrawCircleV(bullet.position, BULLET_RADIUS, RED);
         }
 
         DrawCircleV(enemyPosition, 20.0f, GOLD);
-        DrawText(TextFormat("%i", GetFPS()), 770, 10, 20, RED);
+        DrawText(TextFormat("%i", GetFPS()), 760, 10, 20, RED);
+        DrawText(TextFormat("Active Bullets %i", bulletCount), 10, 10, 20, RED);
+        DrawText(TextFormat("Total Bullets %i", bullets.size()), 10, 30, 20, RED);
 
         EndDrawing();
     }
