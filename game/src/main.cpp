@@ -107,8 +107,17 @@ struct Bullet
     bool destroy = false;
 };
 
+enum LevelState
+{
+    PLAY,
+    WIN
+};
+
 int main()
 {
+    LevelState levelState = PLAY;
+    int level = 1;
+
     int tiles[TILE_COUNT][TILE_COUNT]
     {
         //col:0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19    row:
@@ -133,6 +142,59 @@ int main()
             { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, // 18
             { 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }  // 19
     };
+
+    int tiles2[TILE_COUNT][TILE_COUNT]
+    {
+        //col:0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19    row:
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0 }, // 0
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 }, // 1
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 }, // 2
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 }, // 3
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 }, // 4
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 }, // 5
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 }, // 6
+            { 0, 0, 0, 2, 1, 1, 1, 1, 1, 1, 1, 1, 2, 0, 0, 0, 1, 0, 0, 0 }, // 7
+            { 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0 }, // 8
+            { 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0 }, // 9
+            { 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0 }, // 10
+            { 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, // 11
+            { 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, // 12
+            { 0, 0, 0, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 0, 0, 0 }, // 13
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0 }, // 14
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0 }, // 15
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0 }, // 16
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1, 1, 1, 1, 1, 1, 2, 0, 0, 0 }, // 17
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, // 18
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }  // 19
+    };
+
+    std::vector<std::vector<std::vector<int>>> levels;
+    levels.resize(2);
+    for (int i = 0; i < levels.size(); i++)
+    {
+        levels[i].resize(TILE_COUNT);
+        for (int j = 0; j < TILE_COUNT; j++)
+        {
+            levels[i][j].resize(TILE_COUNT);
+        }
+    }
+
+    for (int y = 0; y < TILE_COUNT; y++)
+    {
+        for (int x = 0; x < TILE_COUNT; x++)
+        {
+            levels[0][y][x] = tiles[y][x];
+        }
+    }
+
+    for (int y = 0; y < TILE_COUNT; y++)
+    {
+        for (int x = 0; x < TILE_COUNT; x++)
+        {
+            levels[1][y][x] = tiles2[y][x];
+        }
+    }
+
     std::vector<Cell> waypoints = FloodFill({ 0, 12 }, tiles, WAYPOINT);
     int curr = 0;
     int next = curr + 1;
@@ -153,6 +215,18 @@ int main()
     while (!WindowShouldClose())
     {
         float dt = GetFrameTime();
+
+        // Press W to win ;)
+        if (IsKeyPressed(KEY_W))
+        {
+            levelState = WIN;
+        }
+
+        if (levelState == WIN)
+        {
+            levelState = PLAY;
+            ++level %= 2;
+        }
 
         shootTimeCurrent += dt;
         if (shootTimeCurrent >= shootTimeTotal && IsKeyDown(KEY_SPACE))
@@ -214,7 +288,8 @@ int main()
         {
             for (int col = 0; col < TILE_COUNT; col++)
             {
-                DrawTile(row, col, tiles[row][col]);
+                DrawTile(row, col, levels[level][row][col]);
+                //DrawTile(row, col, tiles[row][col]);
             }
         }
 
