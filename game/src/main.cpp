@@ -113,12 +113,14 @@ enum LevelState
     WIN
 };
 
+using Level = int[TILE_COUNT][TILE_COUNT];
+
 int main()
 {
     LevelState levelState = PLAY;
-    int level = 1;
+    int levelIndex = 1;
 
-    int tiles[TILE_COUNT][TILE_COUNT]
+    Level tiles =
     {
         //col:0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19    row:
             { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0 }, // 0
@@ -143,7 +145,7 @@ int main()
             { 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }  // 19
     };
 
-    int tiles2[TILE_COUNT][TILE_COUNT]
+    Level tiles2 = 
     {
         //col:0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19    row:
             { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0 }, // 0
@@ -168,32 +170,8 @@ int main()
             { 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }  // 19
     };
 
-    std::vector<std::vector<std::vector<int>>> levels;
-    levels.resize(2);
-    for (int i = 0; i < levels.size(); i++)
-    {
-        levels[i].resize(TILE_COUNT);
-        for (int j = 0; j < TILE_COUNT; j++)
-        {
-            levels[i][j].resize(TILE_COUNT);
-        }
-    }
-
-    for (int y = 0; y < TILE_COUNT; y++)
-    {
-        for (int x = 0; x < TILE_COUNT; x++)
-        {
-            levels[0][y][x] = tiles[y][x];
-        }
-    }
-
-    for (int y = 0; y < TILE_COUNT; y++)
-    {
-        for (int x = 0; x < TILE_COUNT; x++)
-        {
-            levels[1][y][x] = tiles2[y][x];
-        }
-    }
+    // An array two pointers to levels
+    Level* levels[2] = { &tiles, &tiles2 };
 
     std::vector<Cell> waypoints = FloodFill({ 0, 12 }, tiles, WAYPOINT);
     int curr = 0;
@@ -225,7 +203,7 @@ int main()
         if (levelState == WIN)
         {
             levelState = PLAY;
-            ++level %= 2;
+            ++levelIndex %= 2;
         }
 
         shootTimeCurrent += dt;
@@ -288,8 +266,8 @@ int main()
         {
             for (int col = 0; col < TILE_COUNT; col++)
             {
-                DrawTile(row, col, levels[level][row][col]);
-                //DrawTile(row, col, tiles[row][col]);
+                Level& level = *(levels[levelIndex]);
+                DrawTile(row, col, level[row][col]);
             }
         }
 
