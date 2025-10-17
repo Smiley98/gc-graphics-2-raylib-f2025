@@ -1,5 +1,21 @@
 #include "raylib.h"
 #include "raymath.h"
+#include <vector>
+
+struct Enemy
+{
+
+};
+
+struct Turret
+{
+
+};
+
+struct Bullet
+{
+
+};
 
 enum GameState
 {
@@ -8,51 +24,89 @@ enum GameState
     POST_GAME
 };
 
+// Despite what people on the internet may say, its actually perfectly fine to put ALL your game data in ONE struct and pass it everywhere :)
+struct Game
+{
+    GameState state;
+    std::vector<Enemy> enemies;
+    std::vector<Turret> turrets;
+    std::vector<Bullet> bullets;
+};
+
+void OnPreUpdate(Game& game)
+{
+    if (IsKeyPressed(KEY_ENTER))
+        game.state = GAME;
+}
+
+void OnGameUpdate(Game& game)
+{
+    if (IsKeyPressed(KEY_Q))
+        game.state = POST_GAME;
+}
+
+void OnPostUpdate(Game& game)
+{
+    if (IsKeyPressed(KEY_R))
+        game.state = PRE_GAME;
+}
+
+void OnPreDraw(Game& game)
+{
+    ClearBackground(WHITE);
+    DrawText("Press ENTER to start", 400, 400, 20, GREEN);
+}
+
+void OnGameDraw(Game& game)
+{
+    ClearBackground(ORANGE);
+    DrawText("Press Q to quit", 400, 400, 20, BLUE);
+}
+
+void OnPostDraw(Game& game)
+{
+    ClearBackground(VIOLET);
+    DrawText("Press R to restart", 400, 400, 20, PINK);
+}
+
 int main()
 {
-    GameState state = PRE_GAME;
+    Game game;
+    game.state = PRE_GAME;
 
     InitWindow(800, 800, "Game");
     SetTargetFPS(60);
 
     while (!WindowShouldClose())
     {
-        switch (state)
+        switch (game.state)
         {
         case PRE_GAME:
-            if (IsKeyPressed(KEY_ENTER))
-                state = GAME;
+            OnPreUpdate(game);
             break;
 
         case GAME:
-            // Q to quit
-            if (IsKeyPressed(KEY_Q))
-                state = POST_GAME;
+            OnGameUpdate(game);
             break;
 
         case POST_GAME:
-            // R to reset
-            if (IsKeyPressed(KEY_R))
-                state = PRE_GAME;
+            OnPostUpdate(game);
             break;
         }
 
         BeginDrawing();
-        switch (state)
+        switch (game.state)
         {
         case PRE_GAME:
-            ClearBackground(WHITE);
-            DrawText("Press ENTER to start", 400, 400, 20, GREEN);
+            OnPreDraw(game);
             break;
 
         case GAME:
-            ClearBackground(ORANGE);
-            DrawText("Press Q to quit", 400, 400, 20, BLUE);
+            OnGameDraw(game);
             break;
 
         case POST_GAME:
-            DrawText("Press R to reset", 400, 400, 20, PINK);
-            ClearBackground(VIOLET);
+            OnPostDraw(game);
             break;
         }
         EndDrawing();
